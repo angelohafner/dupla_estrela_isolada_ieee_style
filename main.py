@@ -28,7 +28,7 @@ with col3:
     st.markdown("### Unidade")
     nr_lin_int = st.selectbox("Quantidade Série", options=np.arange(1, 11, 1), index=4)
     nr_col_int = st.selectbox("Quantidade Paralelo", options=np.arange(1, 11, 1), index=8)
-    nfiq = st.selectbox("Fusíveis internos queimados no grupo", options=np.arange(0, 6, 1), index=0)
+    # nfiq = st.selectbox("Fusíveis internos queimados no grupo", options=np.arange(0, 6, 1), index=0)
 
 resultados = calculos_iniciais_banco(frequencia_fundamental_Hz,
                                      tensao_nominal_fase_fase,
@@ -80,46 +80,94 @@ matriz_fCr2 = matriz[2, :, nr_col_ext * nr_col_int: 2 * nr_col_ext * nr_col_int]
 
 # Adicioanr os capacitores internos queimados
 # nfiq = número de fusíveis internos queimados em um mesmo grupo
+corrente_entre_estrelas = []
+tensao_no_grupo_afetado = []
+capacitancia_da_fase_afetada = []
+capacitancia_da_unidade_afetada = []
+nfiq_possibilidades = np.arange(0, nr_col_int, 1)
+for nfiq in nfiq_possibilidades:
+    if nfiq != 0:
+        matriz_fAr1[0, np.arange(nfiq)] = 1e-99
 
-if nfiq != 0:
-    matriz_fAr1[0, np.arange(nfiq)] = 1e-99
+    resultados_matrizes_internas = \
+        gerar_matrizes_internas_e_equivalentes_internos(matriz_fAr1, matriz_fBr1, matriz_fCr1,
+                                                        matriz_fAr2, matriz_fBr2, matriz_fCr2,
+                                                        nr_lin_ext, nr_col_ext, nr_lin_int, nr_col_int)
 
-resultados_matrizes_internas = \
-    gerar_matrizes_internas_e_equivalentes_internos(matriz_fAr1, matriz_fBr1, matriz_fCr1,
-                                                    matriz_fAr2, matriz_fBr2, matriz_fCr2,
-                                                    nr_lin_ext, nr_col_ext, nr_lin_int, nr_col_int)
+    # Matrizes são separadas como matrizes de matrizes
+    # Também são calculados os equivalentes paraelos e os equivalentes séries das matrizes internas.
+    # Estes equivalentes são indexados de acordo com o índice da unidade capacitiva correspondente.
+    super_matriz_fAr1, eq_paral_internos_fAr1, eq_serie_internos_fAr1, eq_unidades_fAr1, \
+        super_matriz_fAr2, eq_paral_internos_fAr2, eq_serie_internos_fAr2, eq_unidades_fAr2, \
+        super_matriz_fBr1, eq_paral_internos_fBr1, eq_serie_internos_fBr1, eq_unidades_fBr1, \
+        super_matriz_fBr2, eq_paral_internos_fBr2, eq_serie_internos_fBr2, eq_unidades_fBr2, \
+        super_matriz_fCr1, eq_paral_internos_fCr1, eq_serie_internos_fCr1, eq_unidades_fCr1, \
+        super_matriz_fCr2, eq_paral_internos_fCr2, eq_serie_internos_fCr2, eq_unidades_fCr2 = resultados_matrizes_internas
 
-# Matrizes são separadas como matrizes de matrizes
-# Também são calculados os equivalentes paraelos e os equivalentes séries das matrizes internas.
-# Estes equivalentes são indexados de acordo com o índice da unidade capacitiva correspondente.
-super_matriz_fAr1, eq_paral_internos_fAr1, eq_serie_internos_fAr1, eq_unidades_fAr1, \
-    super_matriz_fAr2, eq_paral_internos_fAr2, eq_serie_internos_fAr2, eq_unidades_fAr2, \
-    super_matriz_fBr1, eq_paral_internos_fBr1, eq_serie_internos_fBr1, eq_unidades_fBr1, \
-    super_matriz_fBr2, eq_paral_internos_fBr2, eq_serie_internos_fBr2, eq_unidades_fBr2, \
-    super_matriz_fCr1, eq_paral_internos_fCr1, eq_serie_internos_fCr1, eq_unidades_fCr1, \
-    super_matriz_fCr2, eq_paral_internos_fCr2, eq_serie_internos_fCr2, eq_unidades_fCr2 = resultados_matrizes_internas
+    resultados_capacitancia_nos_ramos = \
+        capacitancias_equivalentes_nos_ramos(eq_unidades_fAr1, eq_unidades_fBr1, eq_unidades_fCr1,
+                                             eq_unidades_fAr2, eq_unidades_fBr2, eq_unidades_fCr2)
 
-resultados_capacitancia_nos_ramos = \
-    capacitancias_equivalentes_nos_ramos(eq_unidades_fAr1, eq_unidades_fBr1, eq_unidades_fCr1,
-                                         eq_unidades_fAr2, eq_unidades_fBr2, eq_unidades_fCr2)
+    eq_paral_externos_fAr1, eq_serie_externos_fAr1, eq_ramo_fAr1, \
+        eq_paral_externos_fBr1, eq_serie_externos_fBr1, eq_ramo_fBr1, \
+        eq_paral_externos_fCr1, eq_serie_externos_fCr1, eq_ramo_fCr1, \
+        eq_paral_externos_fAr2, eq_serie_externos_fAr2, eq_ramo_fAr2, \
+        eq_paral_externos_fBr2, eq_serie_externos_fBr2, eq_ramo_fBr2, \
+        eq_paral_externos_fCr2, eq_serie_externos_fCr2, eq_ramo_fCr2 = resultados_capacitancia_nos_ramos
 
-eq_paral_externos_fAr1, eq_serie_externos_fAr1, eq_ramo_fAr1, \
-    eq_paral_externos_fBr1, eq_serie_externos_fBr1, eq_ramo_fBr1, \
-    eq_paral_externos_fCr1, eq_serie_externos_fCr1, eq_ramo_fCr1, \
-    eq_paral_externos_fAr2, eq_serie_externos_fAr2, eq_ramo_fAr2, \
-    eq_paral_externos_fBr2, eq_serie_externos_fBr2, eq_ramo_fBr2, \
-    eq_paral_externos_fCr2, eq_serie_externos_fCr2, eq_ramo_fCr2 = resultados_capacitancia_nos_ramos
+    deslocamento_neutro, tensoes_unidades, corrente_unidades, tensoes_internos_fAr1, correntes_internos_fAr1 = \
+        calcular_correntes_tensoes(resultados_capacitancia_nos_ramos,
+                                   resultados_matrizes_internas,
+                                   frequencia_fundamental_Hz,
+                                   tensao_nominal_fase_fase,
+                                   a, nr_lin_ext, nr_col_ext)
 
-deslocamento_neutro, tensoes_unidades, corrente_unidades, tensoes_internos_fAr1, correntes_internos_fAr1 = \
-    calcular_correntes_tensoes(resultados_capacitancia_nos_ramos,
-                               resultados_matrizes_internas,
-                               frequencia_fundamental_Hz,
-                               tensao_nominal_fase_fase,
-                               a, nr_lin_ext, nr_col_ext)
+    # st.markdown("### Tensões na unidade afetada [kV]")
+    # df = pd.DataFrame((np.abs(tensoes_internos_fAr1[0, 0, :, :])/1e3))
+    # st.table(df)
 
-st.markdown("### Tensões na unidade afetada [kV]")
-df = pd.DataFrame((np.abs(tensoes_internos_fAr1[0, 0, :, :])/1e3))
-st.table(df)
+    corrente_entre_estrelas.append(np.abs(deslocamento_neutro[4])[0])
+    tensao_no_grupo_afetado.append(np.abs(tensoes_internos_fAr1[0, 0, 0, 0]))
+    capacitancia_da_fase_afetada.append(1e6*eq_ramo_fAr1)
+    capacitancia_da_unidade_afetada.append(1e6*eq_unidades_fAr1[0,0])
 
-st.markdown("### Corrente entre as duas estrelas [A]")
-st.markdown(f"{np.abs(deslocamento_neutro[4])[0]}")
+st.markdown("### Tabela para ajuste de Alarme e TRIP")
+nfiq_possibilidades_formatado = [str(x) for x in nfiq_possibilidades]
+corrente_entre_estrelas_formatado = [f"{x:.3}" for x in corrente_entre_estrelas]
+tensao_no_grupo_afetado_formatado = [f"{x:.1f}" for x in tensao_no_grupo_afetado]
+tensao_no_grupo_afetado_pu = [f"{x:.3f}" for x in tensao_no_grupo_afetado/tensao_no_grupo_afetado[0]]
+capacitancia_da_fase_afetada_formatado = [f"{x:.1f}" for x in capacitancia_da_fase_afetada]
+capacitancia_da_fase_afetada_pu = [f"{x:.3f}" for x in capacitancia_da_fase_afetada/capacitancia_da_fase_afetada[0]]
+capacitancia_da_unidade_afetada_formatado = [f"{x:.1f}" for x in capacitancia_da_unidade_afetada]
+capacitancia_da_unidade_afetada_pu = [f"{x:.3f}" for x in capacitancia_da_unidade_afetada/capacitancia_da_unidade_afetada[0]]
+
+
+my_array = [nfiq_possibilidades_formatado,
+            corrente_entre_estrelas_formatado,
+            tensao_no_grupo_afetado_formatado,
+            tensao_no_grupo_afetado_pu,
+            capacitancia_da_fase_afetada_formatado,
+            capacitancia_da_fase_afetada_pu,
+            capacitancia_da_unidade_afetada_formatado,
+            capacitancia_da_unidade_afetada_pu]
+
+columns = pd.MultiIndex.from_tuples([
+    ('Número de elementos perdidos', 'f'),
+    ('Corrente entre as estrelas', '[A]'),
+    ('Tensão no grupo afetado', '[V]'),
+    ('Tensão no grupo afetado', '[pu]'),
+    ('Capacitância da fase afetada', '[μF]'),
+    ('Capacitância da fase afetada', '[pu]'),
+    ('Capacitância da unidade afetada', '[μF]'),
+    ('Capacitância da unidade afetada', '[pu]')
+])
+
+# Criando o DataFrame e transpondo
+df_tabela_resumo_ieee = pd.DataFrame(my_array, columns).T
+
+# Convertendo o DataFrame em HTML sem mostrar o índice
+html = df_tabela_resumo_ieee.to_html(index=False)
+
+# Exibindo o HTML no Streamlit
+st.markdown(html, unsafe_allow_html=True)
+
