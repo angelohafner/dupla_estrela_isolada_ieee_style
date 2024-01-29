@@ -113,11 +113,11 @@ def calculos_iniciais_banco(frequencia_fudamental_Hz: float,
     }
 
     dicionario_elemento = {
-        "Potência elemento [VAr]": (potencia_elemento),
-        "Tensão elemento [V]": (tensao_elemento),
-        "Corrente elemento [A]": (corrente_elemento),
-        "Reatância elemento [Ω]": (reatancia_elemento),
-        "Capacitância elemento [F]": (capacitancia_elemento)
+        ("Potência elemento [VAr]"): [potencia_elemento],
+        ("Tensão elemento [V]"): [tensao_elemento],
+        ("Corrente elemento [A]"): [corrente_elemento],
+        ("Reatância elemento [Ω]"): [reatancia_elemento],
+        ("Capacitância elemento [F]"): [capacitancia_elemento]
     }
 
     dicionario_fase_neutro_formatado = {
