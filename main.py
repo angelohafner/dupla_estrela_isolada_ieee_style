@@ -58,13 +58,13 @@ table, th, td {
 """
 
 # Exibindo as tabelas HTML no Streamlit com CSS personalizado
-st.markdown("### Banco sadio")
+st.markdown("### Dados nominais de uma fase do banco")
 st.markdown(align_right_css + html_fase_neutro, unsafe_allow_html=True)
 
-st.markdown("### Unidades capacitivas sadias")
+st.markdown("### Dados nominais de uma unidade capacitiva")
 st.markdown(align_right_css + html_unidade, unsafe_allow_html=True)
 
-st.markdown("### Elementos sadios")
+st.markdown("### Dados nominais de um elemento interno")
 st.markdown(align_right_css + html_elemento, unsafe_allow_html=True)
 
 # %%
@@ -81,6 +81,7 @@ matriz_fCr2 = matriz[2, :, nr_col_ext * nr_col_int: 2 * nr_col_ext * nr_col_int]
 # Adicioanr os capacitores internos queimados
 # nfiq = número de fusíveis internos queimados em um mesmo grupo
 corrente_entre_estrelas = []
+tensao_de_deslocamento_de_neutro = []
 tensao_no_grupo_afetado = []
 capacitancia_da_fase_afetada = []
 capacitancia_da_unidade_afetada = []
@@ -122,18 +123,17 @@ for nfiq in nfiq_possibilidades:
                                    tensao_nominal_fase_fase,
                                    a, nr_lin_ext, nr_col_ext)
 
-    # st.markdown("### Tensões na unidade afetada [kV]")
-    # df = pd.DataFrame((np.abs(tensoes_internos_fAr1[0, 0, :, :])/1e3))
-    # st.table(df)
 
     corrente_entre_estrelas.append(np.abs(deslocamento_neutro[4])[0])
+    tensao_de_deslocamento_de_neutro.append(np.abs(deslocamento_neutro[2]))
     tensao_no_grupo_afetado.append(np.abs(tensoes_internos_fAr1[0, 0, 0, 0]))
     capacitancia_da_fase_afetada.append(1e6*eq_ramo_fAr1)
     capacitancia_da_unidade_afetada.append(1e6*eq_unidades_fAr1[0,0])
 
-st.markdown("### Tabela para ajuste de Alarme e TRIP")
+st.markdown("### Variação das grandezas elétricas em função do número de fusíveis internos queimados (ajuste de alarme e trip)")
 nfiq_possibilidades_formatado = [str(x) for x in nfiq_possibilidades]
 corrente_entre_estrelas_formatado = [f"{x:.3}" for x in corrente_entre_estrelas]
+tensao_de_deslocamento_de_neutro_formatado = [f"{x:.1f}" for x in tensao_de_deslocamento_de_neutro]
 tensao_no_grupo_afetado_formatado = [f"{x:.1f}" for x in tensao_no_grupo_afetado]
 tensao_no_grupo_afetado_pu = [f"{x:.3f}" for x in tensao_no_grupo_afetado/tensao_no_grupo_afetado[0]]
 capacitancia_da_fase_afetada_formatado = [f"{x:.1f}" for x in capacitancia_da_fase_afetada]
@@ -144,6 +144,7 @@ capacitancia_da_unidade_afetada_pu = [f"{x:.3f}" for x in capacitancia_da_unidad
 
 my_array = [nfiq_possibilidades_formatado,
             corrente_entre_estrelas_formatado,
+            tensao_de_deslocamento_de_neutro_formatado,
             tensao_no_grupo_afetado_formatado,
             tensao_no_grupo_afetado_pu,
             capacitancia_da_fase_afetada_formatado,
@@ -154,6 +155,7 @@ my_array = [nfiq_possibilidades_formatado,
 columns = pd.MultiIndex.from_tuples([
     ('Número de elementos perdidos', 'f'),
     ('Corrente entre as estrelas', '[A]'),
+    ('Tensão neutro-terra', '[V]'),
     ('Tensão no grupo afetado', '[V]'),
     ('Tensão no grupo afetado', '[pu]'),
     ('Capacitância da fase afetada', '[μF]'),
