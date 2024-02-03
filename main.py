@@ -16,6 +16,7 @@ with col1:
     frequencia_fundamental_Hz = st.selectbox("Frequência Fundamental [Hz]", options=[60, 50])
     tensao_nominal_fase_fase = st.text_input("Tensao de Linha [kV]", value="34,500")
     tensao_nominal_fase_fase = 1e3 * text_to_decimal(tensao_nominal_fase_fase)
+    tensao_nominal_fase_neutro = tensao_nominal_fase_fase / np.sqrt(3)
 
 with col2:
     st.markdown("### Banco")
@@ -85,6 +86,7 @@ tensao_de_deslocamento_de_neutro = []
 tensao_no_grupo_afetado = []
 capacitancia_da_fase_afetada = []
 capacitancia_da_unidade_afetada = []
+tensao_na_unidade_danificada = []
 nfiq_possibilidades = np.arange(0, nr_col_int, 1)
 for nfiq in nfiq_possibilidades:
     if nfiq != 0:
@@ -129,6 +131,9 @@ for nfiq in nfiq_possibilidades:
     tensao_no_grupo_afetado.append(np.abs(tensoes_internos_fAr1[0, 0, 0, 0]))
     capacitancia_da_fase_afetada.append(1e6*eq_ramo_fAr1)
     capacitancia_da_unidade_afetada.append(1e6*eq_unidades_fAr1[0,0])
+    tensao_na_fase_danificada = tensoes_unidades[0]
+    tensao_na_unidade_danificada.append(np.abs(tensao_na_fase_danificada[0, 0]))
+
 
 st.markdown("### Variação das grandezas elétricas em função do número de fusíveis internos queimados (ajuste de alarme e trip)")
 nfiq_possibilidades_formatado = [str(x) for x in nfiq_possibilidades]
@@ -140,6 +145,7 @@ capacitancia_da_fase_afetada_formatado = [f"{x:.1f}" for x in capacitancia_da_fa
 capacitancia_da_fase_afetada_pu = [f"{x:.3f}" for x in capacitancia_da_fase_afetada/capacitancia_da_fase_afetada[0]]
 capacitancia_da_unidade_afetada_formatado = [f"{x:.1f}" for x in capacitancia_da_unidade_afetada]
 capacitancia_da_unidade_afetada_pu = [f"{x:.3f}" for x in capacitancia_da_unidade_afetada/capacitancia_da_unidade_afetada[0]]
+tensao_na_unidade_danificada_pu_formatado = [f"{x:.3f}" for x in tensao_na_unidade_danificada/(tensao_nominal_fase_neutro/nr_lin_ext)]
 
 
 my_array = [nfiq_possibilidades_formatado,
@@ -147,6 +153,7 @@ my_array = [nfiq_possibilidades_formatado,
             tensao_de_deslocamento_de_neutro_formatado,
             tensao_no_grupo_afetado_formatado,
             tensao_no_grupo_afetado_pu,
+            tensao_na_unidade_danificada_pu_formatado,
             capacitancia_da_fase_afetada_formatado,
             capacitancia_da_fase_afetada_pu,
             capacitancia_da_unidade_afetada_formatado,
@@ -158,6 +165,7 @@ columns = pd.MultiIndex.from_tuples([
     ('Tensão neutro-terra', '[V]'),
     ('Tensão no grupo afetado', '[V]'),
     ('Tensão no grupo afetado', '[pu]'),
+    ('Tensão da unidade afetada', '[pu]'),
     ('Capacitância da fase afetada', '[μF]'),
     ('Capacitância da fase afetada', '[pu]'),
     ('Capacitância da unidade afetada', '[μF]'),
