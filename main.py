@@ -181,3 +181,5 @@ html = df_tabela_resumo_ieee.to_html(index=False)
 # Exibindo o HTML no Streamlit
 st.markdown(html, unsafe_allow_html=True)
 
+# apagar
+
